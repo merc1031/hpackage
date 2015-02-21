@@ -1,0 +1,25 @@
+Prereqs:
+cabal freeze
+pkg/debian/configuration.sh
+
+go to your haskell project, bump your version , copy it into the root directory.
+update debian/changelog
+run ./mktar.sh
+
+dir should look like
+    debian
+    myproject-version.tar.gz
+    myproject
+
+
+run get deps, which should, using your cabal.config constraints, get all deps into bundled dependencies
+
+copy dirs to build machine
+
+run debian build pbuilder.
+
+should get cabal and ghc deps
+
+using those should install all sources as add-sources , and install them as deps
+then build the project.
+

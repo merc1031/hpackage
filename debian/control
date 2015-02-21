@@ -1,0 +1,12 @@
+Source: dummy
+Section: unknown
+Priority: extra
+Maintainer: Maintainer Name <maintainer@maintainer.com>
+Build-Depends: ghc (>= 7.6), cabal-install (>= 1.20)
+Standards-Version: 3.8.3
+Homepage: https://
+
+Package: dummy
+Architecture: any
+Depends: ${shlibs:Depends}, libgmp3c2
+Description: desc

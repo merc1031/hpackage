@@ -1,0 +1,58 @@
+#!/usr/bin/make -f
+PROJNAME=$(shell $(CURDIR)/debian/haskell-extract-changelog-name-version.sh name)
+VERSION=$(shell $(CURDIR)/debian/haskell-extract-changelog-name-version.sh version)
+PROJLABEL=$(PROJNAME)-$(VERSION)
+
+BUILDDIR=$(CURDIR)/debian/build-output
+SRCDIR=$(BUILDDIR)/$(PROJLABEL)
+
+TMPDIR=$(CURDIR)/debian/tmp
+
+WORKDIR=$(CURDIR)/debian/bundled-dependency-workdir
+PACKAGEDIR=$(WORKDIR)/extracted
+
+MSGPREFIX='=========================== DURR '
+
+clean:
+	@echo $(MSGPREFIX)'BEGIN: clean'
+	rm -f $(CURDIR)/debian/files
+	rm -rf $(CURDIR)/.pc
+	rm -rf $(TMPDIR)
+	rm -rf $(BUILDDIR)
+	rm -f $(CURDIR)/debian/substvars
+	rm -rf $(WORKDIR)
+	@echo $(MSGPREFIX)'END: clean'
+
+build-arch:
+	@echo $(MSGPREFIX)'BEGIN: build'
+	mkdir -p $(PACKAGEDIR)
+	mkdir -p $(BUILDDIR)
+	tar axf $(CURDIR)/$(PROJNAME)/dist/$(PROJLABEL).tar.gz -C $(BUILDDIR)
+	cd $(SRCDIR) && cabal sandbox init
+	debian/haskell-install-sandboxed-sources.sh $(SRCDIR)
+	cd $(SRCDIR) && cabal sandbox add-source externals/* && cabal install --only-dependencies && cabal configure && cabal build
+	@echo $(MSGPREFIX)'END: build'
+
+build-indep:
+
+build: build-arch build-indep
+
+binary-arch:
+	@echo $(MSGPREFIX)'BEGIN: binary'
+	touch $(CURDIR)/debian/files
+#	mkdir -p $(TMPDIR)/usr/bin
+#	mkdir -p $(TMPDIR)/etc/init
+#	mkdir -p $(TMPDIR)/etc/$(PROJNAME)/
+#	test -r $(SRCDIR)/config/$(PROJNAME).conf && cp $(SRCDIR)/config/$(PROJNAME).conf $(TMPDIR)/etc/init
+#	cp $(SRCDIR)/dist/build/$(PROJNAME)/$(PROJNAME) $(TMPDIR)/usr/bin/$(PROJNAME)
+	$(SRCDIR)/pkg/debian/configuration.sh $(TMPDIR)
+	mkdir -p $(TMPDIR)/DEBIAN
+	cp $(CURDIR)/debian/control $(TMPDIR)/DEBIAN/control
+	dpkg-shlibdeps $(TMPDIR)/usr/bin/$(PROJLABEL)
+	dpkg-gencontrol -isp
+	dpkg-deb -b $(TMPDIR) ..
+	@echo $(MSGPREFIX)'END: install'
+
+binary-indep:
+
+binary: binary-arch binary-indep
