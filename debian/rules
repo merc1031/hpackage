@@ -11,6 +11,12 @@ TMPDIR=$(CURDIR)/debian/tmp
 WORKDIR=$(CURDIR)/debian/bundled-dependency-workdir
 PACKAGEDIR=$(WORKDIR)/extracted
 
+CABAL=cabal --config-file=$(CURDIR)/config
+
+%:
+	LC_ALL=en_US.UTF-8 dh ${@}
+
+
 MSGPREFIX='=========================== DURR '
 
 clean:
@@ -27,10 +33,10 @@ build-arch:
 	@echo $(MSGPREFIX)'BEGIN: build'
 	mkdir -p $(PACKAGEDIR)
 	mkdir -p $(BUILDDIR)
-	tar axf $(CURDIR)/$(PROJNAME)/dist/$(PROJLABEL).tar.gz -C $(BUILDDIR)
-	cd $(SRCDIR) && cabal sandbox init
-	debian/haskell-install-sandboxed-sources.sh $(SRCDIR)
-	cd $(SRCDIR) && cabal sandbox add-source externals/* && cabal install --only-dependencies && cabal configure && cabal build
+	tar axf $(CURDIR)/$(PROJLABEL).tar.gz -C $(BUILDDIR)
+	cd $(SRCDIR) && $(CABAL) sandbox init
+	debian/haskell-install-sandboxed.sh $(CABAL) $(SRCDIR)
+	cd $(SRCDIR) && $(CABAL) sandbox add-source externals/* && $(CABAL) install --only-dependencies && $(CABAL) configure && $(CABAL) build
 	@echo $(MSGPREFIX)'END: build'
 
 build-indep:

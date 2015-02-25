@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
 
-SRCDIR=$1
+CABAL="$1"
+SRCDIR=$2
 
 BASEDIR=$(cd "$(dirname "$0")"/..; pwd -P)
 cd $BASEDIR
@@ -24,10 +25,10 @@ for PKGFILE in $(ls $BASEDIR/bundled-dependencies/*.tar.gz); do
     PKGNAME=$(basename $PKGFILE .tar.gz)
     PKGDIR=$EXTRACTDIR/$PKGNAME
     echo $PKGDIR
-    cabal sandbox -v add-source --snapshot $PKGDIR
+    $CABAL sandbox -v add-source --snapshot $PKGDIR
     popd
 done
 
-pushd $SRCDIR
-cabal install -v $(ls .cabal-sandbox/snapshots | grep -vE 'base-[0-9]')
-popd
+#pushd $SRCDIR
+#cabal install -v $(ls .cabal-sandbox/snapshots | grep -vE 'base-[0-9]')
+#popd
