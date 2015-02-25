@@ -35,7 +35,7 @@ build-arch:
 	mkdir -p $(BUILDDIR)
 	tar axf $(CURDIR)/$(PROJLABEL).tar.gz -C $(BUILDDIR)
 	cd $(SRCDIR) && $(CABAL) sandbox init
-	debian/haskell-install-sandboxed.sh $(CABAL) $(SRCDIR)
+	debian/haskell-install-sandboxed.sh "$(CABAL)" $(SRCDIR)
 	cd $(SRCDIR) && $(CABAL) sandbox add-source externals/* && $(CABAL) install --only-dependencies && $(CABAL) configure && $(CABAL) build
 	@echo $(MSGPREFIX)'END: build'
 
