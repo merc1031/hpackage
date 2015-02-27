@@ -13,6 +13,10 @@ PACKAGEDIR=$(WORKDIR)/extracted
 
 CABAL=cabal --config-file=$(CURDIR)/config
 
+ifneq (,$(LDFLAGS))
+        LDFLAGS := $(filter-out %-Bsymbolic-functions,$(LDFLAGS))
+endif
+
 %:
 	LC_ALL=en_US.UTF-8 dh ${@}
 
