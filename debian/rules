@@ -56,7 +56,7 @@ binary-arch:
 #	mkdir -p $(TMPDIR)/etc/$(PROJNAME)/
 #	test -r $(SRCDIR)/config/$(PROJNAME).conf && cp $(SRCDIR)/config/$(PROJNAME).conf $(TMPDIR)/etc/init
 #	cp $(SRCDIR)/dist/build/$(PROJNAME)/$(PROJNAME) $(TMPDIR)/usr/bin/$(PROJNAME)
-	$(SRCDIR)/pkg/debian/configuration.sh $(TMPDIR)
+	$(SRCDIR)/pkg/debian/configuration.sh $(TMPDIR) $(SRCDIR)
 	mkdir -p $(TMPDIR)/DEBIAN
 	cp $(CURDIR)/debian/control $(TMPDIR)/DEBIAN/control
 	dpkg-shlibdeps $(TMPDIR)/usr/bin/$(PROJLABEL)
