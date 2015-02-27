@@ -14,7 +14,7 @@ PACKAGEDIR=$(WORKDIR)/extracted
 CABAL=cabal --config-file=$(CURDIR)/config
 
 ifneq (,$(LDFLAGS))
-        LDFLAGS := $(filter-out %-Bsymbolic-functions,$(LDFLAGS))
+	LDFLAGS := $(filter-out %-Bsymbolic-functions,$(LDFLAGS))
 endif
 
 %:
@@ -40,6 +40,7 @@ build-arch:
 	tar axf $(CURDIR)/$(PROJLABEL).tar.gz -C $(BUILDDIR)
 	cd $(SRCDIR) && $(CABAL) sandbox init
 	debian/haskell-install-sandboxed.sh "$(CABAL)" $(SRCDIR)
+	cd $(SRCDIR) && $(CABAL) install Cabal
 	cd $(SRCDIR) && $(CABAL) sandbox add-source externals/* && $(CABAL) install --only-dependencies && $(CABAL) configure && $(CABAL) build
 	@echo $(MSGPREFIX)'END: build'
 

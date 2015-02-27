@@ -11,6 +11,13 @@ mkdir -p bundled-dependencies
 
 rm -f licenses.csv
 touch licenses.csv
+CABAL_DEP_V=$(cabal --version | grep library | sed -rn 's/[^0-9.]*([0-9.]+)[^0-9.]*/\1/p')
+
+CABAL_DEP="Cabal-$CABAL_DEP_V"
+
+echo $CABAL_DEP
+
+DEPS="$CABAL_DEP $DEPS"
 
 pushd bundled-dependencies
 for PACKAGE_QUALIFIED in $DEPS; do
