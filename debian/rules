@@ -56,10 +56,10 @@ binary-arch:
 #	mkdir -p $(TMPDIR)/etc/$(PROJNAME)/
 #	test -r $(SRCDIR)/config/$(PROJNAME).conf && cp $(SRCDIR)/config/$(PROJNAME).conf $(TMPDIR)/etc/init
 #	cp $(SRCDIR)/dist/build/$(PROJNAME)/$(PROJNAME) $(TMPDIR)/usr/bin/$(PROJNAME)
-	$(SRCDIR)/pkg/debian/configuration.sh $(TMPDIR) $(SRCDIR)
+	$(eval BINARY_LOC_REL := $(shell $(SRCDIR)/pkg/debian/configuration.sh $(TMPDIR) $(SRCDIR) | tail -1))
 	mkdir -p $(TMPDIR)/DEBIAN
 	cp $(CURDIR)/debian/control $(TMPDIR)/DEBIAN/control
-	dpkg-shlibdeps $(TMPDIR)/usr/bin/$(PROJLABEL)
+	dpkg-shlibdeps $(TMPDIR)/$(BINARY_LOC_REL)
 	dpkg-gencontrol -isp
 	dpkg-deb -b $(TMPDIR) ..
 	@echo $(MSGPREFIX)'END: install'
