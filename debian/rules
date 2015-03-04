@@ -17,20 +17,20 @@ ifneq (,$(LDFLAGS))
 	LDFLAGS := $(filter-out %-Bsymbolic-functions,$(LDFLAGS))
 endif
 
-%:
-	LC_ALL=en_US.UTF-8 dh ${@}
-
+export LC_ALL=en_US.UTF-8
 
 MSGPREFIX='=========================== DURR '
 
 clean:
 	@echo $(MSGPREFIX)'BEGIN: clean'
+	dh_testdir
 	rm -f $(CURDIR)/debian/files
 	rm -rf $(CURDIR)/.pc
 	rm -rf $(TMPDIR)
 	rm -rf $(BUILDDIR)
 	rm -f $(CURDIR)/debian/substvars
 	rm -rf $(WORKDIR)
+	dh_clean
 	@echo $(MSGPREFIX)'END: clean'
 
 build-arch:
@@ -50,17 +50,26 @@ build: build-arch build-indep
 
 binary-arch:
 	@echo $(MSGPREFIX)'BEGIN: binary'
+	dh_testroot
+	dh_prep
 	touch $(CURDIR)/debian/files
-#	mkdir -p $(TMPDIR)/usr/bin
-#	mkdir -p $(TMPDIR)/etc/init
-#	mkdir -p $(TMPDIR)/etc/$(PROJNAME)/
-#	test -r $(SRCDIR)/config/$(PROJNAME).conf && cp $(SRCDIR)/config/$(PROJNAME).conf $(TMPDIR)/etc/init
-#	cp $(SRCDIR)/dist/build/$(PROJNAME)/$(PROJNAME) $(TMPDIR)/usr/bin/$(PROJNAME)
+	mkdir -p $(TMPDIR)
 	$(eval BINARY_LOC_REL := $(shell $(SRCDIR)/pkg/debian/configuration.sh $(TMPDIR) $(SRCDIR) | tail -1))
 	mkdir -p $(TMPDIR)/DEBIAN
 	cp $(CURDIR)/debian/control $(TMPDIR)/DEBIAN/control
+	dh_installdirs
+	dh_install
+	dh_installdocs
+	dh_install_changelogs
+	dh_installinit -n
+	dh_link
+	dh_compress
+	dh_fixperms
+	dh_strip
 	dpkg-shlibdeps $(TMPDIR)/$(BINARY_LOC_REL)
+	dh_installdeb
 	dpkg-gencontrol -isp
+	dh_md5sums
 	dpkg-deb -b $(TMPDIR) ..
 	@echo $(MSGPREFIX)'END: install'
 
