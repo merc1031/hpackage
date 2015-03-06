@@ -6,12 +6,14 @@ PROJLABEL=$(PROJNAME)-$(VERSION)
 BUILDDIR=$(CURDIR)/debian/build-output
 SRCDIR=$(BUILDDIR)/$(PROJLABEL)
 
-TMPDIR=$(CURDIR)/debian/tmp
+TMPDIR=$(CURDIR)/debian/$(PROJNAME)
 
 WORKDIR=$(CURDIR)/debian/bundled-dependency-workdir
 PACKAGEDIR=$(WORKDIR)/extracted
 
 CABAL=cabal --config-file=$(CURDIR)/config
+
+#export DH_VERBOSE=1
 
 ifneq (,$(LDFLAGS))
 	LDFLAGS := $(filter-out %-Bsymbolic-functions,$(LDFLAGS))
@@ -29,6 +31,8 @@ clean:
 	rm -rf $(TMPDIR)
 	rm -rf $(BUILDDIR)
 	rm -f $(CURDIR)/debian/substvars
+	rm -f $(CURDIR)/debian/$(PROJNAME).debhelper.log
+	rm -f $(CURDIR)/debian/$(PROJNAME).substvars
 	rm -rf $(WORKDIR)
 	dh_clean
 	@echo $(MSGPREFIX)'END: clean'
@@ -41,26 +45,30 @@ build-arch:
 	cd $(SRCDIR) && $(CABAL) sandbox init
 	debian/haskell-install-sandboxed.sh "$(CABAL)" $(SRCDIR)
 	cd $(SRCDIR) && $(CABAL) install Cabal
-	cd $(SRCDIR) && $(CABAL) sandbox add-source externals/* && $(CABAL) install --only-dependencies && $(CABAL) configure && $(CABAL) build
+	cd $(SRCDIR) && $(CABAL) sandbox add-source externals/* && $(CABAL) install --only-dependencies && $(CABAL) configure && $(CABAL) build #todo allow it to discover externals
 	@echo $(MSGPREFIX)'END: build'
 
 build-indep:
 
 build: build-arch build-indep
 
-binary-arch:
-	@echo $(MSGPREFIX)'BEGIN: binary'
+pre-binary-arch:
+	@echo $(MSGPREFIX)'BEGIN: pre-binary'
 	dh_testroot
 	dh_prep
-	touch $(CURDIR)/debian/files
 	mkdir -p $(TMPDIR)
-	$(eval BINARY_LOC_REL := $(shell $(SRCDIR)/pkg/debian/configuration.sh $(TMPDIR) $(SRCDIR) | tail -1))
+	@echo $(MSGPREFIX)'END: pre-binary'
+
+binary-arch: BINARY_LOC_REL = $(shell $(SRCDIR)/pkg/debian/configuration.sh $(TMPDIR) $(SRCDIR) | tail -1)
+binary-arch: pre-binary-arch
+	@echo $(MSGPREFIX)'BEGIN: binary'
+	touch $(CURDIR)/debian/files
 	mkdir -p $(TMPDIR)/DEBIAN
 	cp $(CURDIR)/debian/control $(TMPDIR)/DEBIAN/control
 	dh_installdirs
 	dh_install
 	dh_installdocs
-	dh_install_changelogs
+	dh_installchangelogs
 	dh_installinit -n
 	dh_link
 	dh_compress
@@ -68,7 +76,7 @@ binary-arch:
 	dh_strip
 	dpkg-shlibdeps $(TMPDIR)/$(BINARY_LOC_REL)
 	dh_installdeb
-	dpkg-gencontrol -isp
+	dpkg-gencontrol -isp -P$(TMPDIR)
 	dh_md5sums
 	dpkg-deb -b $(TMPDIR) ..
 	@echo $(MSGPREFIX)'END: install'
