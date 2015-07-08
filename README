@@ -1,24 +1,42 @@
 Prereqs:
-cabal freeze
-pkg/debian/configuration.sh
+In your haskell project:
 
-go to your haskell project, bump your version , copy it into the root directory.
+cabal freeze
+
+A file called ```pkg/debian/configuration.sh``` should exist. It will take 2 arguments 1=the directory to create a debian files structure in ($1/usr/bin, $1/etc/whatever), 2=the intermediate directory to this haskell project that is being built.
+Additionally it needs to return the unqualified path to the executable that will be used to determine debian deps (ex: usr/bin/program  -- note there is no $1/ or / or ./ at the start).
+This script is allows to copy / modify / create files that will be added to the debian files structure.
+
+Any other dependencies should be in externals/
+
+How To Use:
+
+go to your haskell project, bump your version , copy it into the root directory of a hpackage clone (hpackage/myproject). Ideally without a git directory or svn directory or .cabal-sandbox or dist.
 update debian/changelog
 run ./mktar.sh
 
 dir should look like
-    debian
+    debian/
+    config
+    README
+    get-deps.sh
+    mktar.sh
     myproject-version.tar.gz
-    myproject
+    myproject-version/
+    myproject/
 
 
-run get deps, which should, using your cabal.config constraints, get all deps into bundled dependencies
+run ```get-deps.sh```, which should, using your cabal.config constraints, get all deps into bundled dependencies
 
-copy dirs to build machine
+
+The rest depends on your build environment. The rules file in this project will build using the gotten versions from cabal added as add-source dependencies to force the solver not to fetch them from the web after this point.
+
+Ex:
+copy dirs to build machine, that cannot get to cabal
 
 run debian build pbuilder.
 
-should get cabal and ghc deps
+should get cabal and ghc deps from the bundled-dependencies folder
 
 using those should install all sources as add-sources , and install them as deps
 then build the project.
