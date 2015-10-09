@@ -1,12 +1,12 @@
-Source: dummy
+Source: hpackage
 Section: unknown
 Priority: extra
-Maintainer: Maintainer Guy <maintainer@imvu.com>
-Build-Depends: ghc (>= 7.8), cabal-install (>= 1.22)
+Maintainer: Maintainer (maintainer@web.com)
+Build-Depends: ghc (>= 7.8), cabal-install (>= 1.22), zlib1g-dev, libpcre3-dev, libssl-dev, pkg-config, binutils, happy, alex
 Standards-Version: 3.8.3
-Homepage: https://github.com/imvu/
+Homepage: https://
 
 Package: dummy
 Architecture: any
-Depends: ${shlibs:Depends}, libgmp3c2
-Description: dummy desc
+Depends: ${shlibs:Depends}
+Description: desc
